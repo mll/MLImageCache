@@ -42,7 +42,7 @@ Pod::Spec.new do |s|
    s.author             = { "Marek Lipert" => "marek.lipert@gmail.com" }
    s.ios.deployment_target = '5.0'
    s.source       = { :git => "https://github.com/mll/MLImageCache.git", :tag => "1.0.0" }
-   s.source_files  = '*.{h,m,md}'
+   s.source_files  = '*.{h,m}'
    s.requires_arc = true
    s.dependency 'ASIHTTPRequest', '~> 1.8'
 
