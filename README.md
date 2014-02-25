@@ -14,4 +14,4 @@ The highlights:
 
 ## Installation
   
-    Use CocoaPods or copy those 4 files directly into the project. In the latter case you alos have to install ASIHTTPRequest. (If you wonder why do I use this seemingly obsolete library compare its stability and functionality to AFNetworking. It does not change interface every few months and is super-stable and tested). 
+Use CocoaPods or copy those 4 files directly into the project. In the latter case you alos have to install ASIHTTPRequest. (If you wonder why do I use this seemingly obsolete library compare its stability and functionality to AFNetworking. It does not change interface every few months and is super-stable and tested). 
