@@ -1,7 +1,7 @@
 # MLImageCache
 ## Simple yet powerful asynchronous image cache
 
-MLImageCache has been written as an alternative to clumsy SDWebCache. It is based on NSOperation / NSOperationQueue combo, which gives it additional features and safety. 
+MLImageCache has been written as an alternative to clumsy [SDWebCache](https://github.com/rs/SDWebImage). It is based on NSOperation / NSOperationQueue combo, which gives it additional features and safety. 
 
 The highlights:
 
@@ -14,6 +14,16 @@ The highlights:
 
 ## Installation
   
-Use CocoaPods or copy those 4 files directly into the project. In the latter case you alos have to install ASIHTTPRequest. 
+Use CocoaPods or copy those 4 files directly into the project. In the latter case you also have to install [ASIHTTPRequest](http://allseeing-i.com/ASIHTTPRequest/). 
 
-If you wonder why do I use this seemingly obsolete library compare its stability and functionality to AFNetworking. It does not change interface every few months and is super-stable and tested. 
+If you wonder why do I use this seemingly obsolete library compare its stability and functionality to [AFNetworking](https://github.com/AFNetworking/AFNetworking). It does not change interface every few months and is super-stable and tested. 
+
+## How to use it?
+
+    #import "UIImageView+Cache.h"
+    
+    ...
+    
+    [self.imageView setImageWithURL: self.urlToImage ];
+
+And that's it! You can replace SDImageCache instantly. For more advanced features see MLImageCache.h
