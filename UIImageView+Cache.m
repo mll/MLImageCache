@@ -26,7 +26,7 @@ THE SOFTWARE. */
 #import "MLImageCache.h"
 
 
-
+static int oldURLKey = 0;
 
 @implementation UIImageView (MLImageCache)
 
@@ -63,7 +63,11 @@ THE SOFTWARE. */
 
 - (void)setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder options:(SDWebImageOptions)options progress:(SDWebImageDownloaderProgressBlock)progressBlock completed:(SDWebImageCompletedBlock)completedBlock
 {
-    self.image = placeholder; /* nil if nil */
+    NSURL *oldURL = objc_getAssociatedObject(self, &oldURLKey);
+    
+    
+    if(![oldURL isEqual:url])
+        self.image = placeholder; /* nil if nil */
 
     
     if(url.absoluteString.length == 0) return;
@@ -73,7 +77,7 @@ THE SOFTWARE. */
         if(!strongSelf || !image) {
             return;
         }
-
+        
         strongSelf.image = image;
         if(loadedFromCache == NO)
         {
@@ -82,7 +86,7 @@ THE SOFTWARE. */
             strongSelf.alpha = 1.0;
           }];
         }
-      
+        objc_setAssociatedObject(self, &oldURLKey, url, OBJC_ASSOCIATION_COPY_NONATOMIC);
         if(completedBlock) completedBlock(image,nil,SDImageCacheTypeMemory);
     } referenceObject:self];
 }
