@@ -82,11 +82,12 @@ static int oldURLKey = 0;
         if(loadedFromCache == NO)
         {
           strongSelf.alpha = 0.0;
+          __weak UIImageView *weakSelf = strongSelf
           [UIView animateWithDuration:0.2 animations:^{
-            strongSelf.alpha = 1.0;
+            weakSelf.alpha = 1.0;
           }];
         }
-        objc_setAssociatedObject(self, &oldURLKey, url, OBJC_ASSOCIATION_COPY_NONATOMIC);
+        objc_setAssociatedObject(strongSelf, &oldURLKey, url, OBJC_ASSOCIATION_COPY_NONATOMIC);
         if(completedBlock) completedBlock(image,nil,SDImageCacheTypeMemory);
     } referenceObject:self];
 }

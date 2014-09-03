@@ -59,6 +59,7 @@ static char associationKey;
 - (id)init {
     self = [super init];
     if(self) {
+        __weak MLImageCache *weakSelf = self;
         NSAssert([NSThread isMainThread],@"Not on main thread");
         self.downloadQueue = [NSOperationQueue new];
         self.downloadQueue.maxConcurrentOperationCount = kNumberOfSimultaneousDownloads;
@@ -69,7 +70,7 @@ static char associationKey;
         [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidReceiveMemoryWarningNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
            dispatch_async(dispatch_get_main_queue(), ^{
                NSLog(@"Image cache cleared itself after memory warning");
-               [self.cache removeAllObjects];
+               [weakSelf.cache removeAllObjects];
            });
         }];
     }
@@ -144,6 +145,7 @@ static char associationKey;
 
     __block NSData *retVal = [self.cache objectForKey:md5];
     NSString *path = [self.cacheDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.dat",md5]];
+    __weak MLImageCache *weakSelf = self;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         BOOL readFromFile = NO;
         if(!retVal) {
@@ -156,13 +158,13 @@ static char associationKey;
         __weak id weakReference = reference;
         dispatch_async(dispatch_get_main_queue(), ^{
             if(retVal) {
-                if(readFromFile) [self.cache setObject:retVal forKey:md5];
+                if(readFromFile) [weakSelf.cache setObject:retVal forKey:md5];
                 completion(retVal,weakReference,YES);
                 return; /* we assume that image at url never changes */
             }
            // NSLog(@"L2 Cache miss, trying download");
             
-            NSMutableArray *referenceArray = self.downloadReferences[url];
+            NSMutableArray *referenceArray = weakSelf.downloadReferences[url];
             
             if(referenceArray.count) {
                 //NSLog(@"---> Adding additional reference");
@@ -171,18 +173,18 @@ static char associationKey;
             }
             
             referenceArray = [NSMutableArray array];
-            self.downloadReferences[url] = referenceArray;
+            weakSelf.downloadReferences[url] = referenceArray;
             
             [referenceArray addObject:@{@"reference" : reference, @"revision" : [revision copy], @"completion":[completion copy]}];
             
             
-            [self downloadDataAtUrl:url withPriority:priority completion:^(NSData *data, id referenceObject) {
+            [weakSelf downloadDataAtUrl:url withPriority:priority completion:^(NSData *data, id referenceObject) {
                 
                 if(data) {
-                    [self.cache setObject:data forKey:md5];
+                    [weakSelf.cache setObject:data forKey:md5];
                     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
                         BOOL success = NO;
-                        NSString *path = [self.cacheDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.dat",md5]];
+                        NSString *path = [weakSelf.cacheDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.dat",md5]];
                         success = [data writeToFile:path atomically:YES];
                         NSAssert(success, @"An error occurred when writing the image into the file path");
                     });
@@ -201,7 +203,7 @@ static char associationKey;
                         internalCompletion(data,object,NO);
                     }
                 }
-                [self.downloadReferences removeObjectForKey:url];
+                [weakSelf.downloadReferences removeObjectForKey:url];
             } referenceObject:weakReference];
         });
        
