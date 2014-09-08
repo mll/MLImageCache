@@ -82,7 +82,7 @@ static int oldURLKey = 0;
         if(loadedFromCache == NO)
         {
           strongSelf.alpha = 0.0;
-          __weak UIImageView *weakSelf = strongSelf
+          __weak UIImageView *weakSelf = strongSelf;
           [UIView animateWithDuration:0.2 animations:^{
             weakSelf.alpha = 1.0;
           }];
