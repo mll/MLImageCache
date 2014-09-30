@@ -3,7 +3,7 @@ Pod::Spec.new do |s|
 
 
   s.name         = "MLImageCache"
-  s.version      = "1.0.1"
+  s.version      = "1.0.3"
   s.summary      = "Simple yet powerful and fast image cache."
 
   s.description  = <<-DESC
