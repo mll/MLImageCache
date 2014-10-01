@@ -82,6 +82,15 @@ typedef void(^SDWebImageCompletedWithFinishedBlock)(UIImage *image, NSError *err
 
 @interface UIImageView (MLImageCache)
 
+- (void)mll_setImageWithURL:(NSURL *)url;
+- (void)mll_setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder;
+- (void)mll_setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder options:(SDWebImageOptions)options;
+- (void)mll_setImageWithURL:(NSURL *)url completed:(SDWebImageCompletedBlock)completedBlock;
+- (void)mll_setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder completed:(SDWebImageCompletedBlock)completedBlock;
+- (void)mll_setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder options:(SDWebImageOptions)options completed:(SDWebImageCompletedBlock)completedBlock;
+- (void)mll_setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder options:(SDWebImageOptions)options progress:(SDWebImageDownloaderProgressBlock)progressBlock completed:(SDWebImageCompletedBlock)completedBlock;
+- (void)mll_cancelCurrentImageLoad;
+
 - (void)setImageWithURL:(NSURL *)url;
 - (void)setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder;
 - (void)setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder options:(SDWebImageOptions)options;
@@ -89,9 +98,11 @@ typedef void(^SDWebImageCompletedWithFinishedBlock)(UIImage *image, NSError *err
 - (void)setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder completed:(SDWebImageCompletedBlock)completedBlock;
 - (void)setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder options:(SDWebImageOptions)options completed:(SDWebImageCompletedBlock)completedBlock;
 - (void)setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder options:(SDWebImageOptions)options progress:(SDWebImageDownloaderProgressBlock)progressBlock completed:(SDWebImageCompletedBlock)completedBlock;
-- (void) cancelCurrentImageLoad;
+- (void)cancelCurrentImageLoad;
 
 
++ (void)mll_cacheImage:(UIImage*)image forUrl:(NSURL*)forUrl;
 + (void)cacheImage:(UIImage*)image forUrl:(NSURL*)forUrl;
+
 
 @end

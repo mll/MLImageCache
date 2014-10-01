@@ -33,35 +33,71 @@ static int oldURLKey = 0;
 
 - (void)setImageWithURL:(NSURL *)url
 {
-    [self setImageWithURL:url placeholderImage:nil options:0 progress:nil completed:nil];
+    [self mll_setImageWithURL:url placeholderImage:nil options:0 progress:nil completed:nil];
 }
 
 - (void)setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder
 {
-    [self setImageWithURL:url placeholderImage:placeholder options:0 progress:nil completed:nil];
+    [self mll_setImageWithURL:url placeholderImage:placeholder options:0 progress:nil completed:nil];
 }
 
 - (void)setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder options:(SDWebImageOptions)options
 {
-    [self setImageWithURL:url placeholderImage:placeholder options:options progress:nil completed:nil];
+    [self mll_setImageWithURL:url placeholderImage:placeholder options:options progress:nil completed:nil];
 }
 
 - (void)setImageWithURL:(NSURL *)url completed:(SDWebImageCompletedBlock)completedBlock
 {
-    [self setImageWithURL:url placeholderImage:nil options:0 progress:nil completed:completedBlock];
+    [self mll_setImageWithURL:url placeholderImage:nil options:0 progress:nil completed:completedBlock];
 }
 
 - (void)setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder completed:(SDWebImageCompletedBlock)completedBlock
 {
-    [self setImageWithURL:url placeholderImage:placeholder options:0 progress:nil completed:completedBlock];
+    [self mll_setImageWithURL:url placeholderImage:placeholder options:0 progress:nil completed:completedBlock];
 }
 
 - (void)setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder options:(SDWebImageOptions)options completed:(SDWebImageCompletedBlock)completedBlock
 {
-    [self setImageWithURL:url placeholderImage:placeholder options:options progress:nil completed:completedBlock];
+    [self mll_setImageWithURL:url placeholderImage:placeholder options:options progress:nil completed:completedBlock];
 }
 
-- (void)setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder options:(SDWebImageOptions)options progress:(SDWebImageDownloaderProgressBlock)progressBlock completed:(SDWebImageCompletedBlock)completedBlock
+
+- (void)mll_setImageWithURL:(NSURL *)url
+{
+    [self mll_setImageWithURL:url placeholderImage:nil options:0 progress:nil completed:nil];
+}
+
+- (void)mll_setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder
+{
+    [self mll_setImageWithURL:url placeholderImage:placeholder options:0 progress:nil completed:nil];
+}
+
+- (void)mll_setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder options:(SDWebImageOptions)options
+{
+    [self mll_setImageWithURL:url placeholderImage:placeholder options:options progress:nil completed:nil];
+}
+
+- (void)mll_setImageWithURL:(NSURL *)url completed:(SDWebImageCompletedBlock)completedBlock
+{
+    [self mll_setImageWithURL:url placeholderImage:nil options:0 progress:nil completed:completedBlock];
+}
+
+- (void)mll_setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder completed:(SDWebImageCompletedBlock)completedBlock
+{
+    [self mll_setImageWithURL:url placeholderImage:placeholder options:0 progress:nil completed:completedBlock];
+}
+
+- (void)mll_setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder options:(SDWebImageOptions)options completed:(SDWebImageCompletedBlock)completedBlock
+{
+    [self mll_setImageWithURL:url placeholderImage:placeholder options:options progress:nil completed:completedBlock];
+}
+
+- (void) setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder options:(SDWebImageOptions)options progress:(SDWebImageDownloaderProgressBlock)progressBlock completed:(SDWebImageCompletedBlock)completedBlock
+{
+  [self mll_setImageWithURL:(NSURL *)url placeholderImage:placeholder options:options progress:progressBlock completed:completedBlock];
+}
+
+- (void)mll_setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder options:(SDWebImageOptions)options progress:(SDWebImageDownloaderProgressBlock)progressBlock completed:(SDWebImageCompletedBlock)completedBlock
 {
     NSURL *oldURL = objc_getAssociatedObject(self, &oldURLKey);
     
@@ -96,6 +132,11 @@ static int oldURLKey = 0;
 
 - (void) cancelCurrentImageLoad
 {
+    [self mll_cancelCurrentImageLoad];
+}
+
+- (void) mll_cancelCurrentImageLoad
+{
     
 }
 
@@ -103,5 +144,10 @@ static int oldURLKey = 0;
 + (void) cacheImage:(UIImage*)image forUrl:(NSURL*)forUrl {
     [[MLImageCache sharedInstance] cacheImage:image withUrl:forUrl];
 }
+
++ (void) mll_cacheImage:(UIImage*)image forUrl:(NSURL*)forUrl {
+    [[MLImageCache sharedInstance] cacheImage:image withUrl:forUrl];
+}
+
 
 @end
