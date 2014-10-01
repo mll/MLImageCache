@@ -146,10 +146,16 @@ static char associationKey;
     __block NSData *retVal = [self.cache objectForKey:md5];
     NSString *path = [self.cacheDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.dat",md5]];
     __weak MLImageCache *weakSelf = self;
+    if(retVal)
+    {
+        completion(retVal,reference,YES);
+        return;
+    }
+    
+    
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         BOOL readFromFile = NO;
         if(!retVal) {
-            //NSLog(@"L1 Cache miss, trying L2");
             retVal = [NSData dataWithContentsOfFile:path];
             if(retVal) {
               readFromFile = YES;
@@ -162,12 +168,10 @@ static char associationKey;
                 completion(retVal,weakReference,YES);
                 return; /* we assume that image at url never changes */
             }
-           // NSLog(@"L2 Cache miss, trying download");
             
             NSMutableArray *referenceArray = weakSelf.downloadReferences[url];
             
             if(referenceArray.count) {
-                //NSLog(@"---> Adding additional reference");
                 [referenceArray addObject:@{@"reference" : reference, @"revision" : [revision copy],@"completion":[completion copy]}];
                 return;
             }
