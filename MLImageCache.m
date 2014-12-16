@@ -24,7 +24,6 @@ THE SOFTWARE. */
 
 
 #import "MLImageCache.h"
-#import <ASIHttpRequest.h>
 #import <CommonCrypto/CommonDigest.h>
 #import <objc/runtime.h>
 
@@ -222,10 +221,10 @@ static char associationKey;
     NSParameterAssert(completion);
     __weak id weakReference = reference;
     NSOperation *op = [NSBlockOperation blockOperationWithBlock:^{
-        ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
-        [request startSynchronous];
-        NSError *error = [request error];
-        NSData *data = error?nil:request.responseData;
+        NSURLRequest *request = [NSURLRequest requestWithURL:url];
+        NSURLResponse *response = nil;
+        NSError *error = nil;
+        NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
         dispatch_sync(dispatch_get_main_queue(), ^{
             id strongReference = weakReference;
             completion(data,strongReference);
@@ -235,14 +234,13 @@ static char associationKey;
     [self.downloadQueue addOperation:op];
 }
 
-
 - (NSString*)MD5FromData:(NSData *)data
 {
     // Create byte array of unsigned chars
     unsigned char md5Buffer[CC_MD5_DIGEST_LENGTH];
     
     // Create 16 byte MD5 hash value, store in buffer
-    CC_MD5(data.bytes, data.length, md5Buffer);
+    CC_MD5(data.bytes, (unsigned int)data.length, md5Buffer);
     
     // Convert unsigned char buffer to NSString of hex values
     NSMutableString *output = [NSMutableString stringWithCapacity:CC_MD5_DIGEST_LENGTH * 2];
@@ -261,7 +259,7 @@ static char associationKey;
     unsigned char md5Buffer[CC_MD5_DIGEST_LENGTH];
     
     // Create 16 byte MD5 hash value, store in buffer
-    CC_MD5(ptr, strlen(ptr), md5Buffer);
+    CC_MD5(ptr, (unsigned int)strlen(ptr), md5Buffer);
     
     // Convert MD5 value in the buffer to NSString of hex values
     NSMutableString *output = [NSMutableString stringWithCapacity:CC_MD5_DIGEST_LENGTH * 2];
