@@ -133,7 +133,7 @@ static char associationKey;
     NSString *md5 = [self MD5FromString:url.absoluteString];
     NSAssert(md5.length,@"No md5");
     
-    if(!reference) reference = @"dummy reference";
+    if(!reference) reference = [NSNull null];
 
     NSNumber *revision = objc_getAssociatedObject(reference, &associationKey);
     if(revision) {
@@ -169,7 +169,7 @@ static char associationKey;
                 return; /* we assume that image at url never changes */
             }
             
-            NSMutableArray *referenceArray = weakSelf.downloadReferences[url];
+            NSMutableArray *referenceArray = weakSelf.downloadReferences[md5];
             
             if(referenceArray.count) {
                 [referenceArray addObject:@{@"reference" : reference, @"revision" : [revision copy],@"completion":[completion copy]}];
@@ -177,7 +177,7 @@ static char associationKey;
             }
             
             referenceArray = [NSMutableArray array];
-            weakSelf.downloadReferences[url] = referenceArray;
+            weakSelf.downloadReferences[md5] = referenceArray;
             
             [referenceArray addObject:@{@"reference" : reference, @"revision" : [revision copy], @"completion":[completion copy]}];
             
@@ -194,7 +194,7 @@ static char associationKey;
                     });
                 }
                 
-                NSMutableArray *internalReferences = self.downloadReferences[url];
+                NSMutableArray *internalReferences = self.downloadReferences[md5];
                 NSParameterAssert(internalReferences);
                 for(NSDictionary *d in internalReferences) {
                     id object = d[@"reference"];
@@ -202,12 +202,12 @@ static char associationKey;
                     NSNumber *rev = d[@"revision"];
                     void(^internalCompletion)(NSData *data, id referenceObject,BOOL loadedFromCache) = d[@"completion"];
                     
-                    if([internal isEqual:rev]) {
+                    if([internal isEqual:rev] || [object isKindOfClass:[NSNull class]]) {
                         objc_setAssociatedObject(object, &associationKey, nil, OBJC_ASSOCIATION_RETAIN);
                         internalCompletion(data,object,NO);
                     }
                 }
-                [weakSelf.downloadReferences removeObjectForKey:url];
+                [weakSelf.downloadReferences removeObjectForKey:md5];
             } referenceObject:weakReference];
         });
        
