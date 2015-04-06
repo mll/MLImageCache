@@ -213,6 +213,22 @@ static char associationKey;
     });
 }
 
+- (BOOL) removeImageForURL:(NSURL *)url {
+    NSString *md5 = [self MD5FromString:url.absoluteString];
+    __block NSData *retVal = [self.cache objectForKey:md5];
+    if (retVal) {
+        [self.cache removeObjectForKey:md5];
+        NSString *path = [self.cacheDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.dat",md5]];
+        NSError *error;
+        BOOL success = [[NSFileManager defaultManager] removeItemAtPath:path error:&error];
+        if (error) {
+            NSLog(@"Error removing object: %@",error);
+        }
+        return success;
+    }
+    return NO;
+}
+
 
 #pragma mark - Utilities
 
