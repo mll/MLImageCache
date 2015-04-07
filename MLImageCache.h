@@ -50,10 +50,11 @@ THE SOFTWARE. */
 
 - (BOOL) cacheData: (NSData *) data withUrl: (NSURL *)url;
 
-
 /* Tries to load url from disk to memory cache */
 
 - (BOOL) prefetchFromURL: (NSURL *)url;
+
+/* Invalidates the image/data cache for specific URL */
 
 - (BOOL) removeImageForURL:(NSURL *)url;
 
