@@ -55,5 +55,6 @@ THE SOFTWARE. */
 
 - (BOOL) prefetchFromURL: (NSURL *)url;
 
+- (BOOL) removeImageForURL:(NSURL *)url;
 
 @end
