@@ -42,22 +42,24 @@ THE SOFTWARE. */
 
 static char associationKey;
 
-
 @implementation MLImageCache
 
-
-+ (MLImageCache *)sharedInstance {
++ (MLImageCache *)sharedInstance 
+{
     static dispatch_once_t onceToken;
     static MLImageCache *cache;
-    dispatch_once(&onceToken, ^{
+    dispatch_once(&onceToken, ^
+    {
         cache = [[MLImageCache alloc] init];
     });
     return cache;
 }
 
-- (id)init {
+- (id)init 
+{
     self = [super init];
-    if(self) {
+    if(self) 
+    {
         __weak MLImageCache *weakSelf = self;
         NSAssert([NSThread isMainThread],@"Not on main thread");
         self.downloadQueue = [NSOperationQueue new];
@@ -66,8 +68,10 @@ static char associationKey;
         self.cacheDir = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0];
         NSAssert(self.cacheDir,@"No caches directory");
         self.downloadReferences = [NSMutableDictionary dictionary];
-        [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidReceiveMemoryWarningNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
-           dispatch_async(dispatch_get_main_queue(), ^{
+        [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidReceiveMemoryWarningNotification object:nil queue:nil usingBlock:^(NSNotification *note) 
+        {
+           dispatch_async(dispatch_get_main_queue(), ^
+           {
                NSLog(@"Image cache cleared itself after memory warning");
                [weakSelf.cache removeAllObjects];
            });
@@ -81,7 +85,6 @@ static char associationKey;
     return [self cacheData:UIImagePNGRepresentation(image) withUrl:url];
 }
 
-
 - (BOOL) cacheData:(NSData *)data withUrl:(NSURL *)url
 {
     NSAssert([NSThread isMainThread],@"Not on main thread");
@@ -91,8 +94,6 @@ static char associationKey;
     return [data writeToFile:path atomically:YES];
 }
 
-
-
 - (BOOL) prefetchFromURL: (NSURL *)url
 {
     NSAssert([NSThread isMainThread],@"Not on main thread");
@@ -100,9 +101,11 @@ static char associationKey;
     NSString *md5 = [self MD5FromString:url.absoluteString];
     NSData *retVal = [self.cache objectForKey:md5];
     NSString *path = [self.cacheDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.dat",md5]];
-    if(!retVal) {
+    if(!retVal) 
+    {
         retVal = [NSData dataWithContentsOfFile:path];
-        if(retVal) {
+        if(retVal) 
+        {
             [self.cache setObject:retVal forKey:md5];
         }
     }
@@ -111,14 +114,14 @@ static char associationKey;
 
 
 - (void) getImageAtURL: (NSURL *)url withPriority:(NSOperationQueuePriority) priority completion:(void(^)(UIImage *image, id referenceObject,BOOL loadedFromCache)) completion referenceObject: (id) reference {
-    [self getDataAtURL:url withPriority:priority completion:^(NSData *data, id referenceObject,BOOL loadedFromCache) {
-        if(data) {
+    [self getDataAtURL:url withPriority:priority completion:^(NSData *data, id referenceObject,BOOL loadedFromCache) 
+    {
+        if(data) 
+        {
             UIImage *image = [UIImage imageWithData:data];
             if(completion) completion(image,reference,loadedFromCache);
         }
-        
     } referenceObject:reference];
-    
 }
 
 
@@ -135,9 +138,12 @@ static char associationKey;
     if(!reference) reference = [NSNull null];
 
     NSNumber *revision = objc_getAssociatedObject(reference, &associationKey);
-    if(revision) {
+    if(revision) 
+    {
         revision = @(revision.integerValue+1);
-    } else {
+    } 
+    else 
+    {
         revision = @0;
     }
     objc_setAssociatedObject(reference, &associationKey, revision, OBJC_ASSOCIATION_RETAIN);
@@ -151,18 +157,22 @@ static char associationKey;
         return;
     }
     
-    
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^
+    {
         BOOL readFromFile = NO;
-        if(!retVal) {
+        if(!retVal) 
+        {
             retVal = [NSData dataWithContentsOfFile:path];
-            if(retVal) {
+            if(retVal) 
+            {
               readFromFile = YES;
             }
         }
         __weak id weakReference = reference;
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if(retVal) {
+        dispatch_async(dispatch_get_main_queue(), ^
+        {
+            if(retVal) 
+            {
                 if(readFromFile) [weakSelf.cache setObject:retVal forKey:md5];
                 completion(retVal,weakReference,YES);
                 return; /* we assume that image at url never changes */
@@ -170,7 +180,8 @@ static char associationKey;
             
             NSMutableArray *referenceArray = weakSelf.downloadReferences[md5];
             
-            if(referenceArray.count) {
+            if(referenceArray.count) 
+            {
                 [referenceArray addObject:@{@"reference" : reference, @"revision" : [revision copy],@"completion":[completion copy]}];
                 return;
             }
@@ -183,9 +194,11 @@ static char associationKey;
             
             [weakSelf downloadDataAtUrl:url withPriority:priority completion:^(NSData *data, id referenceObject) {
                 
-                if(data) {
+                if(data) 
+                {
                     [weakSelf.cache setObject:data forKey:md5];
-                    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+                    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^
+                    {
                         BOOL success = NO;
                         NSString *path = [weakSelf.cacheDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.dat",md5]];
                         success = [data writeToFile:path atomically:YES];
@@ -195,13 +208,15 @@ static char associationKey;
                 
                 NSMutableArray *internalReferences = self.downloadReferences[md5];
                 NSParameterAssert(internalReferences);
-                for(NSDictionary *d in internalReferences) {
+                for(NSDictionary *d in internalReferences) 
+                {
                     id object = d[@"reference"];
                     NSNumber *internal = objc_getAssociatedObject(object, &associationKey);
                     NSNumber *rev = d[@"revision"];
                     void(^internalCompletion)(NSData *data, id referenceObject,BOOL loadedFromCache) = d[@"completion"];
                     
-                    if([internal isEqual:rev] || [object isKindOfClass:[NSNull class]]) {
+                    if([internal isEqual:rev] || [object isKindOfClass:[NSNull class]]) 
+                    {
                         objc_setAssociatedObject(object, &associationKey, nil, OBJC_ASSOCIATION_RETAIN);
                         internalCompletion(data,object,NO);
                     }
@@ -213,14 +228,15 @@ static char associationKey;
     });
 }
 
-- (BOOL) removeImageForURL:(NSURL *)url {
+- (BOOL) removeImageForURL:(NSURL *)url error: (NSError *__autoreleasing*) error
+{
     NSString *md5 = [self MD5FromString:url.absoluteString];
-    __block NSData *retVal = [self.cache objectForKey:md5];
-    if (retVal) {
+    NSData *retVal = [self.cache objectForKey:md5];
+    if (retVal) 
+    {
         [self.cache removeObjectForKey:md5];
         NSString *path = [self.cacheDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.dat",md5]];
-        NSError *error;
-        BOOL success = [[NSFileManager defaultManager] removeItemAtPath:path error:&error];
+        BOOL success = [[NSFileManager defaultManager] removeItemAtPath:path error:error];
         if (error) {
             NSLog(@"Error removing object: %@",error);
         }
