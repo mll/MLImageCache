@@ -228,6 +228,11 @@ static char associationKey;
     });
 }
 
+- (BOOL) removeImageForURL:(NSURL *)url 
+{
+  return [self removeImageForUrl:url error: nil];
+}
+
 - (BOOL) removeImageForURL:(NSURL *)url error: (NSError *__autoreleasing*) error
 {
     NSString *md5 = [self MD5FromString:url.absoluteString];

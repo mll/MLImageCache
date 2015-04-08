@@ -57,5 +57,7 @@ THE SOFTWARE. */
 /* Invalidates the image/data cache for specific URL */
 
 - (BOOL) removeImageForURL:(NSURL *)url;
+- (BOOL) removeImageForURL:(NSURL *)url error: (NSError *__autoreleasing*) error;
+
 
 @end
