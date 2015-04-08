@@ -230,7 +230,8 @@ static char associationKey;
 
 - (BOOL) removeImageForURL:(NSURL *)url 
 {
-  return [self removeImageForUrl:url error: nil];
+    NSError *error = nil;
+    return [self removeImageForURL:url error: &error];
 }
 
 - (BOOL) removeImageForURL:(NSURL *)url error: (NSError *__autoreleasing*) error
@@ -243,7 +244,7 @@ static char associationKey;
         NSString *path = [self.cacheDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.dat",md5]];
         BOOL success = [[NSFileManager defaultManager] removeItemAtPath:path error:error];
         if (error) {
-            NSLog(@"Error removing object: %@",error);
+            NSLog(@"Error removing object: %@",*error);
         }
         return success;
     }
