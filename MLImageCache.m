@@ -174,6 +174,16 @@ static char associationKey;
             if(retVal) 
             {
                 if(readFromFile) [weakSelf.cache setObject:retVal forKey:md5];
+                /* Async file read might come in a wrong order */
+                NSNumber *fileRevision = objc_getAssociatedObject(reference, &associationKey);
+                if([fileRevision isEqual:revision]) completion(retVal,weakReference,YES);
+                return; /* we assume that image at url never changes */
+            }
+                                                                                                                            
+        
+            if(retVal) 
+            {
+                if(readFromFile) [weakSelf.cache setObject:retVal forKey:md5];
                 completion(retVal,weakReference,YES);
                 return; /* we assume that image at url never changes */
             }
