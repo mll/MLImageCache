@@ -17,6 +17,8 @@ The highlights:
   
 Use CocoaPods or copy those 4 files directly into the project. 
 
+  pod 'MLImageCache'
+
 ## How to use it?
 
     #import "UIImageView+Cache.h"
