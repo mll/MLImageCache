@@ -118,11 +118,12 @@ static int oldURLKey = 0;
            strongSelf.image = image;
            if(loadedFromCache == NO)
            {
-             strongSelf.alpha = 0.0;
-             __weak UIImageView *weakSelf = strongSelf;
-             [UIView animateWithDuration:0.2 animations:^{
-               weakSelf.alpha = 1.0;
-             }];
+               CATransition *transition = [CATransition animation];
+               transition.duration = 0.2f;
+               transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+               transition.type = kCATransitionFade;
+               
+               [strongSelf.layer addAnimation:transition forKey:nil];
            }
         }
         objc_setAssociatedObject(strongSelf, &oldURLKey, url, OBJC_ASSOCIATION_COPY_NONATOMIC);
