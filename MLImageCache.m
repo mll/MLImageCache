@@ -63,10 +63,12 @@ static char associationKey;
         __weak MLImageCache *weakSelf = self;
         NSAssert([NSThread isMainThread],@"Not on main thread");
         self.downloadQueue = [NSOperationQueue new];
-        self.downloadQueue.maxConcurrentOperationCount = kNumberOfSimultaneousDownloads;
+        self.numberOfSimultaneousDownloads = kNumberOfSimultaneousDownloads;
         self.cache = [NSMutableDictionary new];
-        self.cacheDir = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+        self.cacheDir = [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0] stringByAppendingPathComponent:@"image-cache"];
         NSAssert(self.cacheDir,@"No caches directory");
+        [[NSFileManager defaultManager] createDirectoryAtPath:self.cacheDir withIntermediateDirectories:YES attributes:nil error:NULL];
+
         self.downloadReferences = [NSMutableDictionary dictionary];
         [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidReceiveMemoryWarningNotification object:nil queue:nil usingBlock:^(NSNotification *note) 
         {
@@ -79,6 +81,14 @@ static char associationKey;
     }
     return self;
 }
+
+- (void) setNumberOfSimultaneousDownloads: (NSInteger) downloads {
+    self.downloadQueue.maxConcurrentOperationCount = downloads;
+}
+
+- (NSInteger) numberOfSimulatenousDownloads {
+    return self.downloadQueue.maxConcurrentOperationCount;
+} 
 
 - (BOOL) cacheImage:(UIImage *)image withUrl:(NSURL *)url
 {
@@ -261,6 +271,10 @@ static char associationKey;
     return NO;
 }
 
+- (void) removeCache {
+    [[NSFileManager defaultManager] removeItemAtPath:self.cacheDir error:nil];
+    [[NSFileManager defaultManager] createDirectoryAtPath:self.cacheDir withIntermediateDirectories:YES attributes:nil error:NULL];
+}
 
 #pragma mark - Utilities
 

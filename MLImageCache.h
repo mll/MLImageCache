@@ -29,6 +29,9 @@ THE SOFTWARE. */
 
 @interface MLImageCache : NSObject
 
+/// 1 by default
+@property(nonatomic, assign) NSInteger numberOfSimultaneousDownloads;
+
 + (MLImageCache *) sharedInstance;
 
 /* This method gets an image from cache/downloads it. 
@@ -58,6 +61,6 @@ THE SOFTWARE. */
 
 - (BOOL) removeImageForURL:(NSURL *)url;
 - (BOOL) removeImageForURL:(NSURL *)url error: (NSError *__autoreleasing*) error;
-
+- (void) removeCache;
 
 @end
