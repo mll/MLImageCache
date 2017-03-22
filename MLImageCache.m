@@ -134,14 +134,12 @@ static char associationKey;
     } referenceObject:reference];
 }
 
-
-
-
-- (void) getDataAtURL: (NSURL *)url withPriority:(NSOperationQueuePriority) priority completion:(void(^)(NSData *data, id referenceObject,BOOL loadedFromCache)) completion referenceObject: (id) reference
+- (void) getDataAtURL: (NSURL *)url withPriority:(NSOperationQueuePriority) priority postProcessingBlock: (NSData *(^)(NSData *data, id referenceObject)) postProcessingBlock completion:(void(^)(NSData *data, id referenceObject,BOOL loadedFromCache)) completion referenceObject: (id) reference
 {
     NSAssert([NSThread isMainThread],@"Not on main thread");
     NSParameterAssert(url.absoluteString.length);
     NSParameterAssert(completion);
+    NSParameterAssert(postProcessingBlock);
     NSString *md5 = [self MD5FromString:url.absoluteString];
     NSAssert(md5.length,@"No md5");
     
@@ -212,40 +210,44 @@ static char associationKey;
             [referenceArray addObject:@{@"reference" : reference, @"revision" : [revision copy], @"completion":[completion copy]}];
             
             
-            [weakSelf downloadDataAtUrl:url withPriority:priority completion:^(NSData *data, id referenceObject) {
+            [weakSelf downloadDataAtUrl:url withPriority:priority queue: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0) completion:^(NSData *data, id referenceObject) {
+                NSData *processedData = postProcessingBlock(data, referenceObject);
                 
-                if(data) 
+                if(processedData) 
                 {
-                    [weakSelf.cache setObject:data forKey:md5];
-                    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^
-                    {
-                        BOOL success = NO;
-                        NSString *path = [weakSelf.cacheDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.dat",md5]];
-                        success = [data writeToFile:path atomically:YES];
-                        NSAssert(success, @"An error occurred when writing the image into the file path");
-                    });
+                    [weakSelf.cache setObject:processedData forKey:md5];
+                    BOOL success = NO;
+                    NSString *path = [weakSelf.cacheDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.dat",md5]];
+                    success = [processedData writeToFile:path atomically:YES];
+                    NSAssert(success, @"An error occurred when writing the image into the file path");
                 }
-                
-                NSMutableArray *internalReferences = self.downloadReferences[md5];
-                NSParameterAssert(internalReferences);
-                for(NSDictionary *d in internalReferences) 
-                {
-                    id object = d[@"reference"];
-                    NSNumber *internal = objc_getAssociatedObject(object, &associationKey);
-                    NSNumber *rev = d[@"revision"];
-                    void(^internalCompletion)(NSData *data, id referenceObject,BOOL loadedFromCache) = d[@"completion"];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    NSMutableArray *internalReferences = self.downloadReferences[md5];
+                    NSParameterAssert(internalReferences);
+                    for(NSDictionary *d in internalReferences) 
+                    {
+                        id object = d[@"reference"];
+                        NSNumber *internal = objc_getAssociatedObject(object, &associationKey);
+                        NSNumber *rev = d[@"revision"];
+                        void(^internalCompletion)(NSData *data, id referenceObject,BOOL loadedFromCache) = d[@"completion"];
                     
-                    if([internal isEqual:rev] || [object isKindOfClass:[NSNull class]]) 
-                    {
-                        objc_setAssociatedObject(object, &associationKey, nil, OBJC_ASSOCIATION_RETAIN);
-                        internalCompletion(data,object,NO);
+                        if([internal isEqual:rev] || [object isKindOfClass:[NSNull class]]) 
+                        {
+                            objc_setAssociatedObject(object, &associationKey, nil, OBJC_ASSOCIATION_RETAIN);
+                            internalCompletion(processedData,object,NO);
+                        }
                     }
-                }
-                [weakSelf.downloadReferences removeObjectForKey:md5];
+                    [weakSelf.downloadReferences removeObjectForKey:md5];
+                });
             } referenceObject:weakReference];
         });
        
     });
+}
+
+- (void) getDataAtURL: (NSURL *)url withPriority:(NSOperationQueuePriority) priority completion:(void(^)(NSData *data, id referenceObject,BOOL loadedFromCache)) completion referenceObject: (id) reference
+{
+   [self getDataAtURL: url withPriority: priority postProcessingBlock: ^(NSData *data, id referenceObject) { return data; } completion: completion referenceObject: reference];
 }
 
 - (BOOL) removeImageForURL:(NSURL *)url 
@@ -279,6 +281,10 @@ static char associationKey;
 #pragma mark - Utilities
 
 - (void) downloadDataAtUrl: (NSURL *)url withPriority: (NSOperationQueuePriority) priority completion: (void(^)(NSData *data, id referenceObject)) completion referenceObject: (id) reference {
+    [self downloadDataAtUrl: url withPriority: priority queue: dispatch_get_main_queue() completion: completion referenceObject: reference];
+}
+
+- (void) downloadDataAtUrl: (NSURL *)url withPriority: (NSOperationQueuePriority) priority queue: (dispatch_queue_t) queue completion: (void(^)(NSData *data, id referenceObject)) completion referenceObject: (id) reference {
     NSParameterAssert(url);
     NSParameterAssert(completion);
     __weak id weakReference = reference;
@@ -287,7 +293,7 @@ static char associationKey;
         NSURLResponse *response = nil;
         NSError *error = nil;
         NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-        dispatch_sync(dispatch_get_main_queue(), ^{
+        dispatch_sync(queue, ^{
             id strongReference = weakReference;
             completion(data,strongReference);
         });

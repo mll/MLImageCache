@@ -45,6 +45,10 @@ THE SOFTWARE. */
 
 - (void) getDataAtURL: (NSURL *)url withPriority:(NSOperationQueuePriority) priority completion:(void(^)(NSData *data, id referenceObject,BOOL loadedFromCache)) completion referenceObject: (id) reference;
 
+/* This downloads the data but allows for some post-processing */
+
+- (void) getDataAtURL: (NSURL *)url withPriority:(NSOperationQueuePriority) priority postProcessingBlock: (NSData *(^)(NSData *data, id referenceObject)) postProcessBlock completion:(void(^)(NSData *data, id referenceObject,BOOL loadedFromCache)) completion referenceObject: (id) reference;
+
 /* caches image with url */
 
 - (BOOL) cacheImage: (UIImage *) image withUrl: (NSURL *)url;
