@@ -113,6 +113,7 @@ static int oldURLKey = 0;
         if(!strongSelf || !image) {
             return;
         }
+        
         if(![strongSelf.image isEqual:image])
         {
            strongSelf.image = image;
@@ -122,10 +123,11 @@ static int oldURLKey = 0;
                transition.duration = 0.2f;
                transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
                transition.type = kCATransitionFade;
-               
+
                [strongSelf.layer addAnimation:transition forKey:nil];
            }
         }
+        
         objc_setAssociatedObject(strongSelf, &oldURLKey, url, OBJC_ASSOCIATION_COPY_NONATOMIC);
         if(completedBlock) completedBlock(image,nil,SDImageCacheTypeMemory);
     } referenceObject:self];

@@ -126,10 +126,33 @@ static char associationKey;
 - (void) getImageAtURL: (NSURL *)url withPriority:(NSOperationQueuePriority) priority completion:(void(^)(UIImage *image, id referenceObject,BOOL loadedFromCache)) completion referenceObject: (id) reference {
     [self getDataAtURL:url withPriority:priority completion:^(NSData *data, id referenceObject,BOOL loadedFromCache) 
     {
-        if(data) 
+        if(data && completion)
         {
-            UIImage *image = [UIImage imageWithData:data];
-            if(completion) completion(image,reference,loadedFromCache);
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^ {
+                UIImage *image = [UIImage imageWithData:data];
+                double ratio = kMaximumImageWidth / image.size.width;
+                
+                if (ratio < 1.0) {
+                    
+                    if (@available(iOS 10.0, *)) {
+                        CGSize newSize = CGSizeMake(image.size.width * ratio, image.size.height * ratio);
+                        UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:newSize];
+                        UIImage *newImage = [renderer imageWithActions: ^(UIGraphicsImageRendererContext*_Nonnull myContext) {
+                                [image drawInRect:(CGRect) {.origin = CGPointZero, .size = newSize}];
+                            }];
+                        image = newImage;
+                    }
+                }
+                
+                UIGraphicsBeginImageContext(CGSizeMake(1,1));
+                CGContextRef context = UIGraphicsGetCurrentContext();
+                CGContextDrawImage(context, CGRectMake(0, 0, 1, 1), [image CGImage]);
+                UIGraphicsEndImageContext();
+                
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    completion(image, reference, loadedFromCache);
+                });                
+            });
         }
     } referenceObject:reference];
 }
@@ -165,7 +188,7 @@ static char associationKey;
         return;
     }
     
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^
     {
         BOOL readFromFile = NO;
         if(!retVal) 
@@ -210,7 +233,7 @@ static char associationKey;
             [referenceArray addObject:@{@"reference" : reference, @"revision" : [revision copy], @"completion":[completion copy]}];
             
             
-            [weakSelf downloadDataAtUrl:url withPriority:priority queue: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0) completion:^(NSData *data, id referenceObject) {
+            [weakSelf downloadDataAtUrl:url withPriority:priority queue: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0) completion:^(NSData *data, id referenceObject) {
                 NSData *processedData = postProcessingBlock(data, referenceObject);
                 
                 if(processedData) 
