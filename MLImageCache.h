@@ -25,7 +25,7 @@ THE SOFTWARE. */
 
 #import <Foundation/Foundation.h>
 
-#define kNumberOfSimultaneousDownloads 100
+#define kNumberOfSimultaneousDownloads 5
 
 @interface MLImageCache : NSObject
 
