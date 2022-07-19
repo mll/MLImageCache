@@ -33,6 +33,7 @@ THE SOFTWARE. */
 @property(nonatomic,strong) NSMutableDictionary *cache;
 @property(nonatomic,strong) NSString *cacheDir;
 @property(nonatomic,strong) NSMutableDictionary *downloadReferences;
+@property(nonatomic,strong) NSURLSession *downloadSession;
 
 
 - (NSString *)MD5FromData:(NSData *)data;
@@ -66,6 +67,7 @@ static char associationKey;
         self.numberOfSimultaneousDownloads = kNumberOfSimultaneousDownloads;
         self.cache = [NSMutableDictionary new];
         self.cacheDir = [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0] stringByAppendingPathComponent:@"image-cache"];
+        self.downloadSession = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration ephemeralSessionConfiguration]];
         NSAssert(self.cacheDir,@"No caches directory");
         [[NSFileManager defaultManager] createDirectoryAtPath:self.cacheDir withIntermediateDirectories:YES attributes:nil error:NULL];
 
@@ -311,14 +313,23 @@ static char associationKey;
     NSParameterAssert(url);
     NSParameterAssert(completion);
     __weak id weakReference = reference;
+    NSURLSession *session = self.downloadSession;
+        
     NSOperation *op = [NSBlockOperation blockOperationWithBlock:^{
+        __block NSData *data;
+        dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+
         NSURLRequest *request = [NSURLRequest requestWithURL:url];
-        NSURLResponse *response = nil;
-        NSError *error = nil;
-        NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+        
+        [[session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+            data = data;
+            dispatch_semaphore_signal(semaphore);
+        }] resume];
+        
+        dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
         dispatch_sync(queue, ^{
             id strongReference = weakReference;
-            completion(data,strongReference);
+            completion(data, strongReference);
         });
     }];
     op.queuePriority = priority;

@@ -40,7 +40,7 @@ Pod::Spec.new do |s|
    s.license   =  'MIT'
    
    s.author             = { "Marek Lipert" => "marek.lipert@gmail.com" }
-   s.ios.deployment_target = '5.0'
+   s.ios.deployment_target = '9.0'
    s.source       = { :git => "https://github.com/mll/MLImageCache.git", :tag => "1.0.11" }
    s.source_files  = '*.{h,m}'
    s.requires_arc = true

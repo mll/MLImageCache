@@ -26,6 +26,7 @@ THE SOFTWARE. */
 #import <Foundation/Foundation.h>
 
 #define kNumberOfSimultaneousDownloads 5
+#define kMaximumImageWidth 800
 
 @interface MLImageCache : NSObject
 
