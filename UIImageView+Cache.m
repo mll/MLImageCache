@@ -104,7 +104,6 @@ static int oldURLKey = 0;
     
     if(![oldURL isEqual:url])
         self.image = placeholder; /* nil if nil */
-
     
     if(url.absoluteString.length == 0) return;
     
@@ -128,7 +127,7 @@ static int oldURLKey = 0;
            }
         }
         
-        objc_setAssociatedObject(strongSelf, &oldURLKey, url, OBJC_ASSOCIATION_COPY_NONATOMIC);
+        objc_setAssociatedObject(strongSelf, &oldURLKey, url, OBJC_ASSOCIATION_COPY);
         if(completedBlock) completedBlock(image,nil,SDImageCacheTypeMemory);
     } referenceObject:self];
 }
