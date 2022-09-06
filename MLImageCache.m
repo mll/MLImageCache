@@ -151,7 +151,7 @@ static char revisionAssociationKey;
                 UIImage *newImage = [renderer imageWithActions: ^(UIGraphicsImageRendererContext*_Nonnull myContext) {
                         [image drawInRect:(CGRect) {.origin = CGPointZero, .size = newSize}];
                     }];
-                return UIImageJPEGRepresentation(newImage, 1.0);
+                return UIImagePNGRepresentation(newImage);
             }
         }
         return data;
