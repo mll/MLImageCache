@@ -3,7 +3,7 @@ Pod::Spec.new do |s|
 
 
   s.name         = "MLImageCache"
-  s.version      = "1.0.12"
+  s.version      = "1.0.13"
   s.summary      = "Simple yet powerful and fast image cache."
 
   s.description  = <<-DESC
@@ -41,7 +41,7 @@ Pod::Spec.new do |s|
    
    s.author             = { "Marek Lipert" => "marek.lipert@gmail.com" }
    s.ios.deployment_target = '9.0'
-   s.source       = { :git => "https://github.com/mll/MLImageCache.git", :tag => "1.0.12" }
+   s.source       = { :git => "https://github.com/mll/MLImageCache.git", :tag => "1.0.13" }
    s.source_files  = '*.{h,m}'
    s.requires_arc = true
 
